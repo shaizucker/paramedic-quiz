@@ -1,0 +1,353 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>תרגול פרמדיקים – 50 שאלות מרובות בחירה</title>
+  <style>
+    :root{--bg:#0f172a;--card:#111827;--ink:#e5e7eb;--muted:#9ca3af;--accent:#22d3ee;--good:#10b981;--bad:#ef4444;--chip:#1f2937}
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;line-height:1.5;background:linear-gradient(180deg,#0b1022 0%,#0f172a 100%);color:var(--ink)}
+    header{position:sticky;top:0;z-index:20;background:rgba(15,23,42,.8);backdrop-filter:saturate(140%) blur(8px);border-bottom:1px solid #1f2937}
+    .wrap{max-width:1100px;margin:0 auto;padding:16px}
+    h1{margin:0 0 6px;font-size:clamp(20px,2.8vw,32px);letter-spacing:.3px}
+    .sub{color:var(--muted);font-size:14px}
+    .grid{display:grid;grid-template-columns:280px 1fr;gap:16px}
+    @media (max-width:980px){.grid{grid-template-columns:1fr}}
+    aside{position:sticky;top:72px;align-self:start;background:rgba(17,24,39,.6);border:1px solid #1f2937;border-radius:16px;padding:12px}
+    .topic{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:10px 12px;margin:6px 0;border-radius:12px;background:var(--chip);cursor:pointer;border:1px solid #253044}
+    .topic.active{outline:2px solid var(--accent)}
+    .topic small{color:var(--muted)}
+    .card{background:rgba(17,24,39,.8);border:1px solid #1f2937;border-radius:18px;padding:16px}
+    .question{margin:8px 0 10px;font-size:18px}
+    .options{display:grid;gap:10px}
+    .btn{padding:12px 14px;border-radius:12px;background:#0b1220;border:1px solid #253044;color:var(--ink);text-align:right;cursor:pointer}
+    .btn:hover{border-color:#35507a}
+    .btn.correct{background:rgba(16,185,129,.12);border-color:var(--good)}
+    .btn.wrong{animation:shake .2s linear 2;border-color:var(--bad)}
+    @keyframes shake{0%{transform:translateX(0)}25%{transform:translateX(-3px)}50%{transform:translateX(3px)}75%{transform:translateX(-3px)}100%{transform:translateX(0)}}
+    .explain{margin-top:10px;padding:10px 12px;border-left:4px solid var(--accent);background:#0b1220;border-radius:8px}
+    .pill{display:inline-flex;align-items:center;gap:6px;background:var(--chip);border:1px solid #253044;padding:6px 10px;border-radius:999px;color:var(--ink);font-size:12px}
+    .toolbar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:10px}
+    .toolbar .pill{background:#0b1220}
+    .footer{opacity:.8;color:var(--muted);font-size:12px;margin-top:24px}
+    .done{background:rgba(34,211,238,.08);border:1px dashed var(--accent)}
+    .summary{display:none;margin-top:16px}
+    .summary table{width:100%;border-collapse:collapse}
+    .summary th,.summary td{padding:8px;border-bottom:1px solid #1f2937;text-align:right}
+    .tag{font-size:11px;color:#94a3b8}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="wrap">
+      <h1>תרגול פרמדיקים – 50 שאלות</h1>
+      <div class="sub">שאלות מבוססות קובץ הלימוד במדעי יסוד: כימיה, דם/לב וכלי דם, נשימה, מערכת העצבים ועוד. תשובה נכונה מציגה הסבר, תשובה שגויה מאפשרת לנסות שוב. בסיום – סיכום נקודות והישגים.</div>
+      <div class="toolbar">
+        <span class="pill">נענו נכון: <b id="goodCount">0</b></span>
+        <span class="pill">נשארו: <b id="leftCount">0</b></span>
+        <span class="pill">נושא נוכחי: <b id="topicNow">—</b></span>
+        <button class="pill" onclick="showSummary()">סיכום</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="wrap grid">
+    <aside>
+      <div id="topics"></div>
+      <div class="footer">טיפ: אפשר לעבור חופשי בין נושאים. מומלץ להשלים את כל השאלות כדי לראות סיכום מלא.</div>
+    </aside>
+
+    <section>
+      <div id="qRoot" class="card"></div>
+      <div id="summary" class="card summary"></div>
+      <div class="footer">© תרגול לימודי – גרסת קובץ יחיד. אין תלות בשרת.</div>
+    </section>
+  </main>
+
+  <script>
+    // ---- בניית מאגר השאלות (50) ----
+    const QUESTIONS = [
+      // ===== כימיה בסיסית (10) =====
+      q('כימיה בסיסית','מהי יחידת הבניין הבסיסית של חומר?',
+        ['אטום','מולקולה','יון','נוקלאוטיד'],0,
+        'אטום הוא יחידת הבניין הבסיסית; מולקולה נוצרת מחיבור אטומים בקשרים כימיים.'),
+      q('כימיה בסיסית','איזה חלקיק נושא מטען חיובי?',
+        ['פרוטון','נויטרון','אלקטרון','גלוקוז'],0,
+        'פרוטון חיובי, אלקטרון שלילי, נויטרון ניטרלי.'),
+      q('כימיה בסיסית','אטום בעל עודף אלקטרונים ייקרא:',
+        ['אניון','קטיון','איזוטופ','פולימר'],0,
+        'אניון = יון שלילי (יותר אלקטרונים מפרוטונים). קטיון = יון חיובי.'),
+      q('כימיה בסיסית','מה נכון לגבי אלקטרוליטים בגוף?',
+        ['יוצרים בתמיסה יונים חופשיים המוליכים חשמל','אינם מסיסים במים','מעלים את צמיגות הדם בלבד','קיימים רק מחוץ לתאים'],0,
+        'אלקטרוליטים (כמו Na⁺, K⁺, Ca²⁺) מתפרקים ליונים במים ומאפשרים הולכה חשמלית.'),
+      q('כימיה בסיסית','מים יעברו דרך קרום בררני מתמיסה דלילה לריכוזה גבוה יותר של מומסים בתהליך:',
+        ['אוסמוזה','דיפוזיה','פילטרציה','אקטיבציה'],0,
+        'אוסמוזה: מעבר מים דרך קרום חדיר-לממס ליצירת איזון ריכוזים.'),
+      q('כימיה בסיסית','מה ההבדל העיקרי בין תרכובת לתערובת?',
+        ['בתרכובת יש קשרים כימיים קבועים והרכב מוגדר','תערובת תמיד מוצקה','תרכובת אינה יציבה','אין הבדל ביניהן'],0,
+        'תרכובת (כמו NaCl) בעלת קשרים והרכב קבוע; בתערובת אין קשרים כימיים בין המרכיבים.'),
+      q('כימיה בסיסית','מולקולת מים (H₂O) היא דוגמה ל־',
+        ['מולקולה מאטומים שונים','אטומים זהים','תערובת','אלוטרופ'],0,
+        'H ו־O שונים המחוברים בקשר כימי.'),
+      q('כימיה בסיסית','הטבלה המחזורית מציינת לכל יסוד את:',
+        ['מספר הפרוטונים','מספר האלקטרונים בלבד','מספר הנויטרונים בלבד','מספר הקשרים'],0,
+        'מספר אטומי = מספר הפרוטונים בגרעין.'),
+      q('כימיה בסיסית','תמיסה מרוכזת יותר היא תמיסה עם:',
+        ['יותר חלקיקים מומסים ליחידת נפח','יותר ממס','פחות יונים','בלי ממס'],0,
+        'ריכוז = אחוז המומס בתמיסה.'),
+      q('כימיה בסיסית','מהי תמיסה אלקטרוליטית קלאסית בגוף?',
+        ['NaCl במים','גלוקוז יבש','שומן במים','חלבון יבש'],0,
+        'מלח בישול במים מתפרק ל־Na⁺ ו־Cl⁻ ומוליך חשמל.'),
+
+      // ===== דם / לב וכלי דם (20) =====
+      q('דם ולב','איזה מרכיב מהווה ~55% מנפח הדם?',
+        ['פלסמה','כדוריות אדומות','כדוריות לבנות','טסיות'],0,
+        'הפלסמה היא החלק הנוזלי ומכילה בעיקר מים, אלקטרוליטים, חלבונים ועוד.'),
+      q('דם ולב','המטוקריט מתאר:',
+        ['את יחס נפח הכדוריות האדומות מכלל הדם','את רמת הסוכר בדם','את לחץ הדם','את ריוויון החמצן'],0,
+        'בגברים ~45%, בנשים ~42% בממוצע.'),
+      q('דם ולב','תפקיד עיקרי של ההמוגלובין:',
+        ['קשירת חמצן והובלתו','קרישת דם','בקרת לחץ הדם','ייצור גלוקוז'],0,
+        'Hb קושר O₂ (אוקסהמוגלובין) ומשחרר לרקמות.'),
+      q('דם ולב','איזה גורם מקל על שחרור חמצן מהרקמות (הסטת עקומת הדיסוציאציה ימינה)?',
+        ['↑טמפרטורה / ↑H⁺ / ↑CO₂ / ↑DPG','↓טמפרטורה','↓CO₂','↓DPG'],0,
+        'עלייה ב־CO₂, H⁺, טמפרטורה ו־DPG מפחיתה זיקה לחמצן ומעודדת שחרורו.'),
+      q('דם ולב','מהו ערך תקין מקורב של מקטע פליטה (EF) במבוגר?',
+        ['~50–65%','~5–10%','~80–95%','~15–25%'],0,
+        'EF = SV/EDV; ערך ממוצע סביב 50–65%.'),
+      q('דם ולב','Cardiac Output מחושב כ־',
+        ['SV × HR','SV − HR','MAP / SV','DBP × SBP'],0,
+        'תפוקת לב = נפח פעימה × דופק לדקה.'),
+      q('דם ולב','איזה מסתם נמצא בין עליה שמאל לחדר שמאל?',
+        ['מיטרלי (דו־צניפי)','טריקוספידלי','אאורטלי','פולמונרי'],0,
+        'המסתם המיטרלי מפריד בין עליה שמאל לחדר שמאל.'),
+      q('דם ולב','באיזה שלב נפתחים המסתמים הסמי-לונריים?',
+        ['כאשר לחץ החדרים עולה מעל לחץ העורקים (סיסטולה)','בתחילת מילוי דיאסטולי','בעת כיווץ העליות','כאשר ה־EF יורד'],0,
+        'פתיחתם מאפשרת פליטה לאאורטה ולעורק הריאה.'),
+      q('דם ולב','Preload מייצג:',
+        ['לחץ/מתיחה בסוף דיאסטולה','התנגדות ליציאה לעורק','לחץ דופק','MAP'],0,
+        'מושפע מהחזרה הוורידית ומילוי החדר.'),
+      q('דם ולב','Afterload מתאר:',
+        ['הלחץ שיש להתגבר עליו לפתיחת המסתם האאורטלי','כמות החמצן ברקמה','מילוי עליות','כמות טסיות'],0,
+        'קשור בהתנגדות בעורקים הגדולים ולחץ באאורטה.'),
+      q('דם ולב','איזה עורק כלילי מספק את הדופן הקדמית של חדר שמאל?',
+        ['LAD','RCA','Circumflex בלבד','Posterior Descending בלבד'],0,
+        'ה־LAD מספק את הדופן הקדמית וחלק מהספטום.'),
+      q('דם ולב','טסיות (טרומבוציטים) מעורבות בעיקר ב־',
+        ['המוסטזיס ויצירת קריש','נשיאת חמצן','תגובה חיסונית ספציפית','ויסות טמפרטורה'],0,
+        'תהליך הקרישה כולל הצמדות, אגרגציה והפעלת פקטורים ליצירת פיברין.'),
+      q('דם ולב','מה תפקיד פיברינוגן?',
+        ['הופך לפיברין לבניית רשת הקריש','קושר חמצן','מפרק קרישים','מעלה לחץ אוסמוטי'],0,
+        'במהלך קרישה פיברינוגן מומר לפיברין ויוצר רשת לכידת תאים.'),
+      q('דם ולב','איפה נמצא הקוצב הראשי של הלב (SA Node)?',
+        ['בעליה ימין (תקרה)','בעליה שמאל','בין החדרים','בחוד הלב'],0,
+        'קוצב הסינוס מייצר 60–100 פעימות/דקה במצב תקין.'),
+      q('דם ולב','העברת ההולכה מהעליות לחדרים עוברת דרך:',
+        ['AV Node ו־Bundle of His','סיבי פורקינייה תחילה','Circumflex','וריד נבוב'],0,
+        'AV → His → צרורות ימין/שמאל → סיבי פורקינייה.'),
+      q('דם ולב','Pulse Pressure הוא:',
+        ['SBP − DBP','SBP + DBP','MAP − DBP','HR × SBP'],0,
+        'הפרש הלחצים בין סיסטולי לדיאסטולי.'),
+      q('דם ולב','MAP מקורב מחושב כ־',
+        ['DBP + PP/3','SBP + DBP / 2','SBP − (2×DBP)','(SBP×DBP)/HR'],0,
+        'לחץ דם ממוצע מערכתי – מדד לפרפוזיה רקמתית.'),
+      q('דם ולב','איזה אלקטרוליט חוץ-תאי עיקרי משפיע על לחץ אוסמוטי?',
+        ['נתרן (Na⁺)','אשלגן (K⁺)','סידן (Ca²⁺)','מגנזיום (Mg²⁺)'],0,
+        'Na⁺ דומיננטי בנוזל חוץ-תאי ומושך מים.'),
+      q('דם ולב','חלבון פלסמטי מרכזי לשמירת לחץ אונקוטי:',
+        ['אלבומין','פיברינוגן','גלובולין','מיוזין'],0,
+        'אלבומין – נשא מסיסים ושומר על לחצים אונקוטיים בכלי הדם.'),
+      q('דם ולב','מה נכון לגבי זרימת הדם בעורקים כליליים?',
+        ['רובה מתרחשת בדיאסטולה','רובה מתרחשת בסיסטולה','אחידה לאורך המחזור','מתרחשת רק בזמן נשיפה'],0,
+        'בזמן דיאסטולה המסתם האאורטלי סגור והזרימה לקורונרים מיטבית.'),
+
+      // ===== מערכת הנשימה (15) =====
+      q('נשימה','מהו אתר חילוף הגזים העיקרי בריאות?',
+        ['נאדיות (Alveoli)','קנה הנשימה','סמפונות ראשיים','חלל האף'],0,
+        'חילוף O₂/CO₂ מתרחש ברמת המפגש אלוואולו-קפילרי.'),
+      q('נשימה','איזה חומר מצפה את פנים הנאדית ומונע קריסה?',
+        ['סורפקטנט','מוצין','חלבון C-ריאקטיבי','אדרנלין'],0,
+        'Surfactant מפחית מתח פנים ושומר נפח שארית בנאדיות.'),
+      q('נשימה','מהו נפח המשתחלף הממוצע בנשימה רגילה (TV)?',
+        ['~500 מ״ל','~50 מ״ל','~1500 מ״ל','~50 ליטר'],0,
+        'Tidal Volume במבוגר ~500 מ״ל; כ־150 מ״ל Dead Space.'),
+      q('נשימה','Minute Volume מחושב כ־',
+        ['RR × TV','RR − TV','TV / RR','(TLC − RV)'],0,
+        'אוורור לדקה = קצב נשימה × נפח משתחלף.'),
+      q('נשימה','Dead Space אנטומי הוא:',
+        ['נפח אוויר שלא משתתף בחילוף גזים','נפח האוויר בנאדיות','נפח שאיפה מירבי','נפח שארית'],0,
+        'בעיקר בדרכי אוויר מוליכות (קנה/סמפונות) ~150 מ״ל.'),
+      q('נשימה','איזה רפלקס מגן מפני קריעת ריאה עקב מתיחת יתר?',
+        ['Hering–Breuer','Babinski','Oculocephalic','Ashner'],0,
+        'Stretch receptors בדופן הריאה מעבירים משוב למרכז הנשימה.'),
+      q('נשימה','מהו הגורם המרכזי לוויסות הנשימה במנוחה?',
+        ['רמת CO₂ (pCO₂) ומידת ה־H⁺','רוויית O₂ בלבד','טמפרטורת ליבה','לחץ דם'],0,
+        'כימורצפטורים מרכזיים רגישים ל־CO₂/‏H⁺ במדולה.'),
+      q('נשימה','Hypoxemia מוגדרת כ־',
+        ['ירידת pO₂ עורקי < 60 mmHg','עליית pCO₂ > 50 mmHg','ירידה ב־pCO₂ < 35','עליית HCO₃⁻'],0,
+        'ירידה בלחץ החלקי של O₂ בדם העורקי.'),
+      q('נשימה','Hypercarbia פירושה:',
+        ['pCO₂ גבוה מהנורמה (>50 mmHg)','pCO₂ נמוך','pO₂ גבוה','אלקלוזיס מטבולי'],0,
+        'עודף CO₂, לרוב עקב היפו־ונטילציה או ייצור מוגבר.'),
+      q('נשימה','באיזה מבנה נמצאת הקרינה (Carina)?',
+        ['בקצה קנה הנשימה, נקודת התפצלות הסמפונות','בין חללי האף','בבסיס הלשון','בשסתום המיטרלי'],0,
+        'הקרינה רגישה לגירוי (Vagus) ושיעול.'),
+      q('נשימה','איזה שסתום/מבנה מונע חדירת מזון לקנה?',
+        ['אפיגלוטיס','ולקולה','כריכות האף','קריקואיד'],0,
+        'האפיגלוטיס מכסה את פתח הקנה בזמן בליעה.'),
+      q('נשימה','איזו אונה קיימת רק בריאה ימין?',
+        ['אונה אמצעית','אונה תחתונה','אונה עליונה','אין הבדל'],0,
+        'בריאה ימין – עליונה, אמצעית ותחתונה; בשמאל – עליונה ותחתונה.'),
+      q('נשימה','איזה עצב מעצבב את הסרעפת?',
+        ['Phrenic (C3–C5)','Vagus (X)','Accessory (XI)','Trigeminal (V)'],0,
+        'C3–C5 keep the diaphragm alive.'),
+      q('נשימה','שאיפה רגילה היא תהליך:',
+        ['אקטיבי (כיווץ סרעפת ובין־צלעיים)','פסיבי בלבד','תלוי בכבד','אינו תלוי בלחצים'],0,
+        'שאיפה: כיווץ שרירים → הגדלת נפח → ירידת לחץ → כניסת אוויר.'),
+      q('נשימה','מהי Atelectasis?',
+        ['תמט ריאתי הפיך אם מנופח מחדש בזמן','עודף אוויר בין הפלורות','דלקת נאדיות','נוזל פלאורלי דלקתי'],0,
+        'קריסת נאדיות/סגמנט; לעיתים הפיך אם מטופל מוקדם.'),
+
+      // ===== מערכת העצבים (5) =====
+      q('מערכת העצבים','מי מהבאים אינו חלק מהנוירון?',
+        ['אריתרוציט','סומה','דנדריט','אקסון'],0,
+        'אריתרוציט הוא תא דם אדום; נוירון כולל סומה, דנדריטים ואקסון.'),
+      q('מערכת העצבים','מה תפקיד המיאלין?',
+        ['בידוד והאצת הולכה לאורך האקסון','ייצור נוגדנים','יצירת פיברין','הפרשת אינסולין'],0,
+        'מיאלין מגדיל מהירות הולכה ומונע "קצרים" בין אקסונים שכנים.'),
+      q('מערכת העצבים','אפרנטי (Afferent) פירושו:',
+        ['מביא מידע סנסורי אל ה־CNS','מוציא פקודה מוטורית','נוירון עצב־קדם־סימפטטי','הפרשה אנדוקרינית'],0,
+        'Afferent → אל המרכז; Efferent → החוצה אל איברי מטרה.'),
+      q('מערכת העצבים','העברה סינפטית מתרחשת בעיקר באמצעות:',
+        ['נוירוטרנסמיטרים מקצות האקסון','יוני נתרן בפלאזמה','אלבומין','פקטורי קרישה'],0,
+        'שחרור וזיקולות עם מתווכים כימיים לקליטה בתא הבא.'),
+      q('מערכת העצבים','מרווחי Nodes of Ranvier מאפשרים:',
+        ['הולכה דלגתית וחידוש פוטנציאל פעולה','ייצור המוגלובין','קרישת דם','דיפוזיית חמצן'],0,
+        'החלפת יונים עם הנוזל החוץ־תאי והולכה מהירה (Saltatory).'),
+    ];
+
+    function q(topic, question, options, correctIndex, explain){
+      return {topic, question, options, correctIndex, explain, id: crypto.randomUUID(), done:false, pick:null};
+    }
+
+    // ---- קיבוץ נושאים ----
+    const topics = [...new Set(QUESTIONS.map(q=>q.topic))];
+    const state = {topic: topics[0], correct:0};
+
+    // ---- UI: תפריט נושאים ----
+    const topicsEl = document.getElementById('topics');
+    const qRoot = document.getElementById('qRoot');
+    const goodCount = document.getElementById('goodCount');
+    const leftCount = document.getElementById('leftCount');
+    const topicNow = document.getElementById('topicNow');
+
+    function renderTopics(){
+      topicsEl.innerHTML = '';
+      topics.forEach(t=>{
+        const total = QUESTIONS.filter(x=>x.topic===t).length;
+        const done = QUESTIONS.filter(x=>x.topic===t && x.done).length;
+        const btn = document.createElement('button');
+        btn.className = 'topic' + (state.topic===t?' active':'');
+        btn.innerHTML = `<span>${t}</span><small>${done}/${total}</small>`;
+        btn.onclick = ()=>{state.topic=t; renderTopics(); renderOne()};
+        topicsEl.appendChild(btn);
+      })
+    }
+
+    function renderOne(){
+      topicNow.textContent = state.topic;
+      goodCount.textContent = QUESTIONS.filter(q=>q.done && q.pick==='ok').length;
+      leftCount.textContent = QUESTIONS.filter(q=>!q.done).length;
+
+      // הבא בתור בנושאים שנבחרו
+      const pool = QUESTIONS.filter(q=>q.topic===state.topic && !q.done);
+      if(pool.length===0){
+        qRoot.classList.add('done');
+        qRoot.innerHTML = `<div class="question">סיימת את כל השאלות בנושא <b>${state.topic}</b> ✅</div>
+        <div><button class="pill" onclick="showSummary()">למסך הסיכום</button></div>`;
+        return;
+      }
+      qRoot.classList.remove('done');
+      const item = pool[0]; // שאלה ראשונה שטרם נענתה
+
+      qRoot.innerHTML = `
+        <div class="pill tag">${item.topic}</div>
+        <div class="question">${item.question}</div>
+        <div class="options">${item.options.map((opt,i)=>
+          `<button class='btn' data-i='${i}'>${String.fromCharCode(0x05D0+i)}. ${opt}</button>`
+        ).join('')}</div>
+        <div class="explain" id="exp" style="display:none"></div>
+        <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap">
+          <button class="pill" onclick="skip()">דלג/י לשאלה הבאה</button>
+          <button class="pill" onclick="showSummary()">סיכום</button>
+        </div>
+      `;
+
+      qRoot.querySelectorAll('.btn').forEach(btn=>{
+        btn.onclick = ()=>{
+          const pick = +btn.dataset.i;
+          if(pick === item.correctIndex){
+            btn.classList.add('correct');
+            item.done = true; item.pick='ok';
+            const exp = qRoot.querySelector('#exp');
+            exp.style.display='block';
+            exp.textContent = 'נכון! ' + item.explain;
+            setTimeout(()=>renderOne(), 650);
+          } else {
+            btn.classList.add('wrong');
+            item.pick='retry';
+          }
+          goodCount.textContent = QUESTIONS.filter(q=>q.done && q.pick==='ok').length;
+          leftCount.textContent = QUESTIONS.filter(q=>!q.done).length;
+        }
+      })
+    }
+
+    function skip(){
+      // מעביר לשאלה אחרת באותו נושא
+      const pool = QUESTIONS.filter(q=>q.topic===state.topic && !q.done);
+      if(pool.length>1){
+        const first = pool.shift();
+        // סיבוב
+        QUESTIONS.splice(QUESTIONS.indexOf(first),1);
+        QUESTIONS.push(first);
+      }
+      renderOne();
+    }
+
+    function showSummary(){
+      const s = document.getElementById('summary');
+      const total = QUESTIONS.length;
+      const correct = QUESTIONS.filter(q=>q.done && q.pick==='ok').length;
+      const attempted = QUESTIONS.filter(q=>q.done).length;
+      const percent = Math.round((correct/total)*100);
+      const byTopic = topics.map(t=>{
+        const tt = QUESTIONS.filter(q=>q.topic===t);
+        const ok = tt.filter(q=>q.pick==='ok').length;
+        return {t, ok, total: tt.length}
+      });
+      s.style.display='block';
+      s.innerHTML = `
+        <h2 style="margin:0 0 8px">סיכום</h2>
+        <div class="pill">ציון כולל: <b>${correct}/${total}</b> (${percent}%)</div>
+        <div class="pill">שאלות שנוסו: <b>${attempted}</b></div>
+        <div style="margin-top:10px" class="card">
+          <table>
+            <thead><tr><th>נושא</th><th>נכונות</th><th>מתוך</th></tr></thead>
+            <tbody>
+              ${byTopic.map(r=>`<tr><td>${r.t}</td><td>${r.ok}</td><td>${r.total}</td></tr>`).join('')}
+            </tbody>
+          </table>
+        </div>
+        <div class="footer">טיפ: ניתן לרענן את העמוד כדי לתרגל שוב. השאלות מבוססות על חומר הקורס בקובץ הלימוד.</div>
+      `;
+      window.scrollTo({top:0,behavior:'smooth'});
+    }
+
+    // התחלה
+    renderTopics();
+    renderOne();
+  </script>
+</body>
+</html>
